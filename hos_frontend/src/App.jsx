@@ -20,11 +20,7 @@ function MainContent() {
           <h1 className="text-2xl font-extrabold text-brand-navy tracking-tight">HOS Trip Planner</h1>
           <p className="text-sm text-slate-500 hidden md:block">Compliance & Route Simulation Engine</p>
         </div>
-        {trip && (
-          <div className="text-xs font-mono bg-slate-200 px-2 py-1 rounded text-slate-600">
-            v2.1 • US FMCSA Rules
-          </div>
-        )}
+
       </header>
 
       <main className={`mx-auto transition-all duration-500 ${trip ? 'w-full max-w-[1920px]' : 'max-w-4xl'}`}>

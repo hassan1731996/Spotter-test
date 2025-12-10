@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
-const LocationSearchInput = ({ label, value, onChange, onSelectLocation, id }) => {
+const LocationSearchInput = ({ label, value, onChange, onSelectLocation, id, error }) => {
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const wrapperRef = useRef(null);
@@ -51,15 +51,28 @@ const LocationSearchInput = ({ label, value, onChange, onSelectLocation, id }) =
             <label htmlFor={id} className="block text-brand-navy text-sm font-semibold mb-1">
                 {label}
             </label>
-            <input
-                id={id}
-                type="text"
-                value={value}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition"
-                placeholder="Search address..."
-                autoComplete="off"
-            />
+            <div className="relative">
+                <input
+                    id={id}
+                    type="text"
+                    value={value}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    className={`w-full p-2 pr-10 border rounded outline-none transition
+                        ${error
+                            ? 'border-red-500 bg-red-50 focus:ring-red-200 focus:border-red-500 text-red-900 placeholder-red-300'
+                            : 'border-slate-300 focus:ring-2 focus:ring-brand-blue focus:border-transparent'
+                        }`}
+                    placeholder="Search address..."
+                    autoComplete="off"
+                />
+                {error && (
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <svg className="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                    </div>
+                )}
+            </div>
             {showSuggestions && suggestions.length > 0 && (
                 <div className="absolute z-10 w-full bg-white border border-slate-200 mt-1 rounded shadow-lg max-h-48 overflow-y-auto">
                     {suggestions.map((item, idx) => (

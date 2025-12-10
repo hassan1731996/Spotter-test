@@ -106,7 +106,7 @@ const TripInputForm = ({ onSubmit, isLoading, compactMode = false }) => {
     // Cycle calc
     const CYCLE_LIMIT = 70;
     const hoursRemaining = CYCLE_LIMIT - (parseFloat(formData.cycle_used_hours) || 0);
-    const cycleColor = hoursRemaining < 10 ? 'text-brand-error' : 'text-brand-success';
+    const cycleColor = hoursRemaining < 10 ? 'text-red-600' : (hoursRemaining < 20 ? 'text-amber-600' : 'text-emerald-600');
 
     return (
         <form onSubmit={handleSubmit} className="p-6 bg-white shadow-lg rounded-xl border border-slate-100">
@@ -131,9 +131,9 @@ const TripInputForm = ({ onSubmit, isLoading, compactMode = false }) => {
                                     value={formData.current_location}
                                     onChange={(val) => handleLocationChange('current_location', val)}
                                     onSelectLocation={(pt) => handleLocationSelect('current', pt)}
-                                    className={errors.current_location ? 'border-brand-error' : ''}
+                                    error={errors.current_location}
                                 />
-                                {errors.current_location && <p className="text-xs text-brand-error mt-1 font-medium">{errors.current_location}</p>}
+                                {errors.current_location && <p className="text-xs text-red-500 mt-1 font-medium flex items-center"><span className="mr-1">⚠</span> {errors.current_location}</p>}
                             </div>
                             <div>
                                 <LocationSearchInput
@@ -142,9 +142,9 @@ const TripInputForm = ({ onSubmit, isLoading, compactMode = false }) => {
                                     value={formData.pickup_location}
                                     onChange={(val) => handleLocationChange('pickup_location', val)}
                                     onSelectLocation={(pt) => handleLocationSelect('pickup', pt)}
-                                    className={errors.pickup_location ? 'border-brand-error' : ''}
+                                    error={errors.pickup_location}
                                 />
-                                {errors.pickup_location && <p className="text-xs text-brand-error mt-1 font-medium">{errors.pickup_location}</p>}
+                                {errors.pickup_location && <p className="text-xs text-red-500 mt-1 font-medium flex items-center"><span className="mr-1">⚠</span> {errors.pickup_location}</p>}
                             </div>
                             <div>
                                 <LocationSearchInput
@@ -153,9 +153,9 @@ const TripInputForm = ({ onSubmit, isLoading, compactMode = false }) => {
                                     value={formData.dropoff_location}
                                     onChange={(val) => handleLocationChange('dropoff_location', val)}
                                     onSelectLocation={(pt) => handleLocationSelect('dropoff', pt)}
-                                    className={errors.dropoff_location ? 'border-brand-error' : ''}
+                                    error={errors.dropoff_location}
                                 />
-                                {errors.dropoff_location && <p className="text-xs text-brand-error mt-1 font-medium">{errors.dropoff_location}</p>}
+                                {errors.dropoff_location && <p className="text-xs text-red-500 mt-1 font-medium flex items-center"><span className="mr-1">⚠</span> {errors.dropoff_location}</p>}
                             </div>
                         </div>
                     </div>
@@ -168,16 +168,23 @@ const TripInputForm = ({ onSubmit, isLoading, compactMode = false }) => {
                                 <label htmlFor="cycle_used_hours" className="block text-brand-navy text-sm font-semibold mb-1">
                                     Current Cycle Used (Hrs)
                                 </label>
-                                <input
-                                    id="cycle_used_hours"
-                                    type="number"
-                                    name="cycle_used_hours"
-                                    value={formData.cycle_used_hours}
-                                    onChange={handleChange}
-                                    className={`w-full p-2 border rounded focus:ring-2 focus:ring-brand-blue outline-none ${errors.cycle_used_hours ? 'border-brand-error focus:ring-brand-error' : 'border-slate-300'}`}
-                                    step="0.1"
-                                />
-                                {errors.cycle_used_hours && <p className="text-xs text-brand-error mt-1 font-medium">{errors.cycle_used_hours}</p>}
+                                <div className="relative">
+                                    <input
+                                        id="cycle_used_hours"
+                                        type="number"
+                                        name="cycle_used_hours"
+                                        value={formData.cycle_used_hours}
+                                        onChange={handleChange}
+                                        className={`w-full p-2 pr-8 border rounded outline-none transition ${errors.cycle_used_hours ? 'border-red-500 bg-red-50 text-red-900 focus:ring-red-200' : 'border-slate-300 focus:ring-2 focus:ring-brand-blue'}`}
+                                        step="0.1"
+                                    />
+                                    {errors.cycle_used_hours && (
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                            <span className="text-red-500">!</span>
+                                        </div>
+                                    )}
+                                </div>
+                                {errors.cycle_used_hours && <p className="text-xs text-red-500 mt-1 font-medium">{errors.cycle_used_hours}</p>}
                                 <div className="flex justify-between items-center mt-1 text-xs">
                                     <span className="text-slate-500">70h/8d Limit</span>
                                     <span className={`font-bold ${cycleColor}`}>
@@ -187,29 +194,43 @@ const TripInputForm = ({ onSubmit, isLoading, compactMode = false }) => {
                             </div>
 
                             <div>
-                                <label htmlFor="truck_number" className="block text-brand-navy text-sm font-semibold mb-1">Truck Number</label>
-                                <input
-                                    id="truck_number"
-                                    type="text"
-                                    name="truck_number"
-                                    value={formData.truck_number}
-                                    onChange={handleChange}
-                                    className={`w-full p-2 border rounded focus:ring-2 focus:ring-brand-blue outline-none ${errors.truck_number ? 'border-brand-error focus:ring-brand-error' : 'border-slate-300'}`}
-                                />
-                                {errors.truck_number && <p className="text-xs text-brand-error mt-1 font-medium">{errors.truck_number}</p>}
+                                <label htmlFor="truck_number" className="block text-brand-navy text-sm font-semibold mb-1">Assigned Truck ID</label>
+                                <div className="relative">
+                                    <input
+                                        id="truck_number"
+                                        type="text"
+                                        name="truck_number"
+                                        value={formData.truck_number}
+                                        onChange={handleChange}
+                                        className={`w-full p-2 pr-8 border rounded outline-none transition ${errors.truck_number ? 'border-red-500 bg-red-50 text-red-900 focus:ring-red-200' : 'border-slate-300 focus:ring-2 focus:ring-brand-blue'}`}
+                                    />
+                                    {errors.truck_number && (
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                            <span className="text-red-500">!</span>
+                                        </div>
+                                    )}
+                                </div>
+                                {errors.truck_number && <p className="text-xs text-red-500 mt-1 font-medium">{errors.truck_number}</p>}
                             </div>
 
                             <div className="col-span-2">
                                 <label htmlFor="carrier_name" className="block text-brand-navy text-sm font-semibold mb-1">Carrier Name</label>
-                                <input
-                                    id="carrier_name"
-                                    type="text"
-                                    name="carrier_name"
-                                    value={formData.carrier_name}
-                                    onChange={handleChange}
-                                    className={`w-full p-2 border rounded focus:ring-2 focus:ring-brand-blue outline-none ${errors.carrier_name ? 'border-brand-error focus:ring-brand-error' : 'border-slate-300'}`}
-                                />
-                                {errors.carrier_name && <p className="text-xs text-brand-error mt-1 font-medium">{errors.carrier_name}</p>}
+                                <div className="relative">
+                                    <input
+                                        id="carrier_name"
+                                        type="text"
+                                        name="carrier_name"
+                                        value={formData.carrier_name}
+                                        onChange={handleChange}
+                                        className={`w-full p-2 pr-8 border rounded outline-none transition ${errors.carrier_name ? 'border-red-500 bg-red-50 text-red-900 focus:ring-red-200' : 'border-slate-300 focus:ring-2 focus:ring-brand-blue'}`}
+                                    />
+                                    {errors.carrier_name && (
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                            <span className="text-red-500">!</span>
+                                        </div>
+                                    )}
+                                </div>
+                                {errors.carrier_name && <p className="text-xs text-red-500 mt-1 font-medium">{errors.carrier_name}</p>}
                             </div>
                         </div>
                     </div>
