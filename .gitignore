@@ -1,0 +1,35 @@
+# General
+.DS_Store
+*.log
+*.swp
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+.env
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDEs
+.idea/
+.vscode/
+
+# Frontend (if not covered by nested gitignore, but good to have)
+node_modules/
+dist/
+build/
+.npm/
