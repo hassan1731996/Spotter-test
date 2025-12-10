@@ -21,8 +21,10 @@ describe('SummaryPanel', () => {
 
         render(<SummaryPanel trip={trip} recaps={recaps} />);
 
-        expect(screen.getByText('500.50 mi')).toBeInTheDocument();
-        expect(screen.getByText('8.50 hrs')).toBeInTheDocument();
+        expect(screen.getByText('Trip Summary')).toBeInTheDocument();
+
+        expect(screen.getByText('500.5 mi')).toBeInTheDocument();
+        expect(screen.getByText('8.5 hrs')).toBeInTheDocument();
 
         // Table row
         expect(screen.getByText('2023-10-10')).toBeInTheDocument();

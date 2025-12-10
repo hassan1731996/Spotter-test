@@ -19,6 +19,10 @@ class CarrierInfoSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+        extra_kwargs = {
+            'carrier_name': {'required': True, 'allow_blank': False},
+            'truck_number': {'required': True, 'allow_blank': False},
+        }
 
 
 class StopSerializer(serializers.ModelSerializer):
@@ -95,6 +99,20 @@ class TripSerializer(serializers.ModelSerializer):
     segments = DutySegmentSerializer(many=True, read_only=True)
     recaps = RecapSerializer(many=True, read_only=True)
 
+    def validate_cycle_used_hours(self, value):
+        """Ensure cycle used hours is non-negative and within limit."""
+        if value < 0:
+            raise serializers.ValidationError("Cycle used hours cannot be negative.")
+        if value > 70:
+             raise serializers.ValidationError("Cycle used hours cannot exceed 70 hours.")
+        return value
+
+    def validate(self, data):
+        """Cross-field validation."""
+        if data.get('current_location') == data.get('pickup_location'):
+             raise serializers.ValidationError("Current location and pickup location cannot be the same.")
+        return data
+
     class Meta:
         model = Trip
         fields = [
@@ -117,6 +135,12 @@ class TripSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+        extra_kwargs = {
+            'current_location': {'required': True, 'allow_blank': False},
+            'pickup_location': {'required': True, 'allow_blank': False},
+            'dropoff_location': {'required': True, 'allow_blank': False},
+            'cycle_used_hours': {'required': True},
+        }
         read_only_fields = [
             "status",
             "total_distance_miles",

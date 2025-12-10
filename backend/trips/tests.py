@@ -4,64 +4,104 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 from rest_framework import status
 from .models import Trip, CarrierInfo, DutyStatus, StopType, DutySegment, Recap
-from .hos_engine import HOSEngine
+from .services.hos_compliance_service import HOSComplianceService
+from .hos_rules import HOSRules
 
-class HOSEngineTestCase(TestCase):
+class HOSComplianceServiceTestCase(TestCase):
     def setUp(self):
-        self.carrier = CarrierInfo.objects.create(
-            carrier_name="Test Carrier",
-            truck_number="101"
-        )
-        self.trip = Trip.objects.create(
-            carrier=self.carrier,
-            current_location="New York, NY",
-            pickup_location="Philadelphia, PA",
-            dropoff_location="Washington, DC",
-            cycle_used_hours=10.0
-        )
-        self.engine = HOSEngine(self.trip)
-
+        self.service = HOSComplianceService()
+        self.rules = HOSRules()
+        
     def test_drive_limit_enforcement(self):
-        """Test that driving is limited to 11 hours per shift"""
-        # Mock available drive time to 5 hours to force a rest break
-        self.engine.drive_time_today = 6.0 
-        available = self.engine.get_available_drive_time()
+        """Test rule calculation via HOSRules (used by service)"""
+        # Testing logic explicitly through rules since Service is an orchestrator
+        available = self.rules.get_available_drive_time(
+            drive_time_today=6.0,
+            shift_start_time=timezone.now() - timedelta(hours=6),
+            current_time=timezone.now()
+        )
         self.assertEqual(available, 5.0)
 
-    def test_30m_break_requirement(self):
-        """Test 30m break logic"""
-        # Simulate 8 hours driving
-        self.engine.drive_time_since_break = 8.0
+    def test_simulation_break_insertion(self):
+        """Test that simulation inserts breaks"""
+        # Create a mock route plan that requires a break
+        # 8 hours driving leg
+        start_time = timezone.now()
+        route_plan = {
+            "locations": {
+                "start": {"address": "A", "coords": (0,0)},
+                "pickup": {"address": "B", "coords": (0,0)},
+                "dropoff": {"address": "C", "coords": (0,0)}
+            },
+            "sequence": [
+                {
+                    "type": "drive",
+                    "origin_name": "A",
+                    "dest_name": "Pickup",
+                    "distance_miles": 600, # ~10 hours at 60mph
+                    "data": {}
+                }
+            ]
+        }
         
-        # Should trigger break logic if we try to drive more
-        # This is implicitly tested in drive_leg, but let's check segment creation logic
-        self.engine.take_30m_break()
-        self.assertEqual(self.engine.drive_time_since_break, 0)
-        self.assertEqual(len(self.engine.segments), 1)
-        self.assertEqual(self.engine.segments[0].status, DutyStatus.OFF_DUTY)
-        self.assertEqual(self.engine.segments[0].duration_minutes, 30)
-
-    def test_rest_break_requirement(self):
-        """Test 10h rest logic"""
-        self.engine.drive_time_today = 11.0 # Maxed out
-        self.engine.take_rest_break("10h Rest Break")
-        self.assertEqual(self.engine.drive_time_today, 0)
-        self.assertEqual(len(self.engine.segments), 1)
-        self.assertEqual(self.engine.segments[0].duration_minutes, 600) # 10 hours
-
-    def test_recap_generation(self):
-        """Test that recaps are generated for segments"""
-        # Create some segments manually
-        self.engine.add_segment(DutyStatus.DRIVING, "Drive", "Loc", 5.0) # 5h drive
-        self.engine.add_segment(DutyStatus.ON_DUTY, "Work", "Loc", 1.0) # 1h work
-        self.engine.generate_recaps()
+        result = self.service.simulate_trip(route_plan, start_time, initial_cycle_used=0.0)
+        segments = result["segments"]
         
-        self.assertEqual(len(self.engine.recaps), 1)
-        recap = self.engine.recaps[0]
-        self.assertEqual(float(recap.driving_hours), 5.0)
-        self.assertEqual(float(recap.on_duty_hours), 1.0)
-        # Cycle used was 10.0 initially + 6.0 new = 16.0
-        self.assertEqual(float(recap.cycle_used_hours), 16.0)
+        # Should have: Start stop, Pre-trip, Drive (part 1), Break, Drive (part 2)
+        # Check for break segment
+        break_segs = [s for s in segments if s["activity"] == "30m Break"]
+        self.assertTrue(len(break_segs) >= 1)
+        self.assertEqual(break_segs[0]["duration_minutes"], 30)
+
+    def test_simulation_rest_insertion(self):
+        """Test that simulation inserts 10h rest if limits hit"""
+        # Mock huge drive
+        start_time = timezone.now()
+        route_plan = {
+            "locations": {
+                "start": {"address": "A", "coords": (0,0)},
+                "pickup": {"address": "B", "coords": (0,0)},
+                "dropoff": {"address": "C", "coords": (0,0)}
+            },
+            "sequence": [
+                {
+                    "type": "drive",
+                    "origin_name": "A",
+                    "dest_name": "Pickup",
+                    "distance_miles": 900, # ~15 hours
+                    "data": {}
+                }
+            ]
+        }
+        
+        result = self.service.simulate_trip(route_plan, start_time)
+        segments = result["segments"]
+        
+        rest_segs = [s for s in segments if s["activity"] == "10h Rest Break (HOS Limit)"]
+        self.assertTrue(len(rest_segs) >= 1)
+        self.assertEqual(rest_segs[0]["duration_minutes"], 600)
+
+from .services.log_renderer_service import LogRendererService
+class LogRendererServiceTestCase(TestCase):
+    def test_recap_calculation(self):
+        """Test arithmetic for recap summaries"""
+        renderer = LogRendererService()
+        segments = [
+            {"day_index": 1, "status": DutyStatus.DRIVING, "duration_minutes": 300}, # 5h
+            {"day_index": 1, "status": DutyStatus.ON_DUTY, "duration_minutes": 60},  # 1h
+            {"day_index": 2, "status": DutyStatus.DRIVING, "duration_minutes": 120}, # 2h
+        ]
+        start_time = timezone.now()
+        recaps = renderer.calculate_recaps(segments, initial_cycle_used=10.0, trip_instance_time=start_time)
+        
+        self.assertEqual(len(recaps), 2)
+        r1 = recaps[0]
+        self.assertEqual(r1["driving_hours"], 5.0)
+        self.assertEqual(r1["cycle_used_hours"], 16.0) # 10 + 5 + 1
+        
+        r2 = recaps[1]
+        self.assertEqual(r2["driving_hours"], 2.0)
+        self.assertEqual(r2["cycle_used_hours"], 18.0) # 16 + 2
 
 class TripApiIntegrationTestCase(TestCase):
     def setUp(self):

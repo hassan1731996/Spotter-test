@@ -27,12 +27,12 @@ describe('App Integration', () => {
             stops: [],
             segments: [],
             recaps: [
-                { id: '1', day_index: 1, date: '2023-01-01', driving_hours: '5.0', on_duty_hours: '1.0', cycle_remaining_hours: '60.0' }
+                { id: '1', day_index: 1, date: '2023-01-01', driving_hours: 5.0, on_duty_hours: 1.0, cycle_remaining_hours: 60.0, cycle_used_hours: 10.0 }
             ],
-            total_distance_miles: '100.0',
-            total_drive_hours: '5.0',
-            total_on_duty_hours: '6.0',
-            cycle_used_hours: '10.0'
+            total_distance_miles: 100.0,
+            total_drive_hours: 5.0,
+            total_on_duty_hours: 6.0,
+            cycle_used_hours: 10.0
         };
 
         api.createTrip.mockResolvedValue({ id: '123' });
@@ -45,12 +45,12 @@ describe('App Integration', () => {
         fireEvent.change(screen.getByLabelText(/Pickup Location/i), { target: { value: 'B' } });
         fireEvent.change(screen.getByLabelText(/Dropoff Location/i), { target: { value: 'C' } });
 
-        // Submit
-        fireEvent.click(screen.getByRole('button', { name: /Generate Trip Plan/i }));
-
+        // Submit form
+        const submitButton = screen.getByRole('button', { name: /Generate Compliance Plan/i });
+        fireEvent.click(submitButton);
         // Check loading state
         expect(screen.getByRole('button')).toBeDisabled();
-        expect(screen.getByText('Generating Plan...')).toBeInTheDocument();
+        expect(screen.getByText(/Simulating/i)).toBeInTheDocument();
 
         // Wait for result
         await waitFor(() => {
@@ -71,7 +71,8 @@ describe('App Integration', () => {
 
         render(<App />);
 
-        fireEvent.click(screen.getByRole('button', { name: /Generate Trip Plan/i }));
+        const submitButton = screen.getByRole('button', { name: /Generate Compliance Plan/i });
+        fireEvent.click(submitButton);
 
         await waitFor(() => {
             expect(screen.getByText('Failed to create trip. Please try again.')).toBeInTheDocument();

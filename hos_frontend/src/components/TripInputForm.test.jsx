@@ -32,6 +32,6 @@ describe('TripInputForm', () => {
     it('disables button when loading', () => {
         render(<TripInputForm onSubmit={() => { }} isLoading={true} />);
         expect(screen.getByRole('button')).toBeDisabled();
-        expect(screen.getByText('Generating Plan...')).toBeInTheDocument();
+        expect(screen.getByText(/Simulating/i)).toBeInTheDocument();
     });
 });

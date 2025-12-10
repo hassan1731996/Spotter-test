@@ -1,72 +1,100 @@
-import React, { useState } from 'react';
+import React from 'react';
 import TripInputForm from './components/TripInputForm';
 import MapView from './components/MapView';
-import LogSheet from './components/LogSheet';
+import LogSheetGrid from './components/LogSheetGrid';
+import ComplianceDashboard from './components/ComplianceDashboard';
 import SummaryPanel from './components/SummaryPanel';
-import { createTrip, getTrip } from './api';
+import { TripProvider, useTrip } from './context/TripContext';
 
-function App() {
-  const [trip, setTrip] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+function MainContent() {
+  const { trip, loading, error, createTripPlan } = useTrip();
 
-  const handleTripSubmit = async (data) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const newTrip = await createTrip(data);
-      // Fetch full details including segments
-      const fullTrip = await getTrip(newTrip.id);
-      setTrip(fullTrip);
-    } catch (err) {
-      console.error(err);
-      setError('Failed to create trip. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+  const handleTripSubmit = (data) => {
+    createTripPlan(data);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">HOS Trip Planner</h1>
-        <p className="text-gray-600">Simulate truck trips and generate compliant log sheets.</p>
+    <div className="min-h-screen bg-gray-50 p-2 md:p-4 font-sans text-slate-800">
+      <header className={`mb-4 transition-all duration-300 ${trip ? 'flex items-center justify-between px-2' : 'text-center'}`}>
+        <div>
+          <h1 className="text-2xl font-extrabold text-brand-navy tracking-tight">HOS Trip Planner</h1>
+          <p className="text-sm text-slate-500 hidden md:block">Compliance & Route Simulation Engine</p>
+        </div>
+        {trip && (
+          <div className="text-xs font-mono bg-slate-200 px-2 py-1 rounded text-slate-600">
+            v2.1 • US FMCSA Rules
+          </div>
+        )}
       </header>
 
-      <main className="max-w-7xl mx-auto space-y-8">
-        <TripInputForm onSubmit={handleTripSubmit} isLoading={loading} />
+      <main className={`mx-auto transition-all duration-500 ${trip ? 'w-full max-w-[1920px]' : 'max-w-4xl'}`}>
+        <div className={`grid gap-4 ${trip ? 'grid-cols-1 lg:grid-cols-12 items-start' : 'grid-cols-1'}`}>
 
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-            {error}
-          </div>
-        )}
+          {/* Input Form Column */}
+          <div className={`${trip ? 'lg:col-span-3 xl:col-span-2' : ''} transition-all`}>
+            <TripInputForm onSubmit={handleTripSubmit} isLoading={loading} compactMode={!!trip} />
 
-        {trip && (
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2">
-                <MapView stops={trip.stops} segments={trip.segments} />
+            {error && (
+              <div className="mt-4 bg-red-50 border-l-4 border-brand-error text-red-700 p-3 rounded text-sm shadow-sm" role="alert">
+                <p className="font-bold">Simulation Error</p>
+                <p>{error}</p>
               </div>
-              <div>
-                <SummaryPanel trip={trip} recaps={trip.recaps} />
-              </div>
-            </div>
-
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Log Sheets</h2>
-              {trip.recaps.map(recap => (
-                <LogSheet
-                  key={recap.day_index}
-                  segments={trip.segments}
-                  dayIndex={recap.day_index}
-                />
-              ))}
-            </div>
+            )}
           </div>
-        )}
+
+          {/* Results Column */}
+          {trip && (
+            <div className="lg:col-span-9 xl:col-span-10 space-y-4 animate-fadeIn">
+
+              {/* Upper Dashboard: Map + Status */}
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 h-[500px]">
+                {/* Main Map - Takes 2/3 width on huge screens, full on large */}
+                <div className="xl:col-span-2 h-full bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative">
+                  <div className="absolute top-2 left-2 z-[400] bg-white/90 backdrop-blur px-3 py-1 rounded shadow text-xs font-bold text-brand-navy">
+                    Interactive Route Map
+                  </div>
+                  <div className="h-full w-full">
+                    <MapView stops={trip.stops} segments={trip.segments} />
+                  </div>
+                </div>
+
+                {/* Right Side Stats Panel */}
+                <div className="xl:col-span-1 flex flex-col gap-4 h-full overflow-y-auto pr-1">
+                  <ComplianceDashboard recaps={trip.recaps} trip={trip} />
+                  <SummaryPanel trip={trip} recaps={trip.recaps} />
+                </div>
+              </div>
+
+              {/* Bottom Section: Logs */}
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                <h2 className="text-lg font-bold text-brand-navy mb-3 flex items-center">
+                  <svg className="w-5 h-5 mr-2 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 011.414.586l4 4a1 1 0 01.586 1.414V19a2 2 0 01-2 2z"></path></svg>
+                  Daily Duty Status Logs
+                </h2>
+                <div className="grid grid-cols-1 gap-6">
+                  {trip.recaps.map(recap => (
+                    <LogSheetGrid
+                      key={recap.day_index}
+                      segments={trip.segments}
+                      dayIndex={recap.day_index}
+                    />
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          )}
+        </div>
       </main>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <TripProvider>
+      <MainContent />
+    </TripProvider>
   );
 }
 

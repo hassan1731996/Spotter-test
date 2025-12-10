@@ -9,19 +9,19 @@ const SummaryPanel = ({ trip, recaps }) => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div className="p-3 bg-blue-50 rounded">
                     <div className="text-sm text-gray-500">Total Distance</div>
-                    <div className="text-lg font-bold">{trip.total_distance_miles} mi</div>
+                    <div className="text-lg font-bold">{Number(trip.total_distance_miles).toFixed(1)} mi</div>
                 </div>
                 <div className="p-3 bg-green-50 rounded">
                     <div className="text-sm text-gray-500">Drive Time</div>
-                    <div className="text-lg font-bold">{trip.total_drive_hours} hrs</div>
+                    <div className="text-lg font-bold">{Number(trip.total_drive_hours).toFixed(1)} hrs</div>
                 </div>
                 <div className="p-3 bg-yellow-50 rounded">
                     <div className="text-sm text-gray-500">On Duty Time</div>
-                    <div className="text-lg font-bold">{trip.total_on_duty_hours} hrs</div>
+                    <div className="text-lg font-bold">{Number(trip.total_on_duty_hours).toFixed(1)} hrs</div>
                 </div>
                 <div className="p-3 bg-purple-50 rounded">
                     <div className="text-sm text-gray-500">Cycle Used</div>
-                    <div className="text-lg font-bold">{trip.cycle_used_hours} hrs</div>
+                    <div className="text-lg font-bold">{Number(trip.cycle_used_hours).toFixed(1)} hrs</div>
                 </div>
             </div>
 
