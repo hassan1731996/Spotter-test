@@ -1,22 +1,19 @@
-import React, { createContext, useContext } from 'react';
+import { createContext, useContext } from 'react';
 import { useTripPlanner } from '../hooks/useTripPlanner';
 
 const TripContext = createContext(null);
 
 export const TripProvider = ({ children }) => {
-    const tripState = useTripPlanner();
+  const tripState = useTripPlanner();
 
-    return (
-        <TripContext.Provider value={tripState}>
-            {children}
-        </TripContext.Provider>
-    );
+  return <TripContext.Provider value={tripState}>{children}</TripContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTrip = () => {
-    const context = useContext(TripContext);
-    if (!context) {
-        throw new Error('useTrip must be used within a TripProvider');
-    }
-    return context;
+  const context = useContext(TripContext);
+  if (!context) {
+    throw new Error('useTrip must be used within a TripProvider');
+  }
+  return context;
 };

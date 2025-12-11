@@ -20,8 +20,8 @@ class CarrierInfoSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         extra_kwargs = {
-            'carrier_name': {'required': True, 'allow_blank': False},
-            'truck_number': {'required': True, 'allow_blank': False},
+            "carrier_name": {"required": True, "allow_blank": False},
+            "truck_number": {"required": True, "allow_blank": False},
         }
 
 
@@ -104,13 +104,17 @@ class TripSerializer(serializers.ModelSerializer):
         if value < 0:
             raise serializers.ValidationError("Cycle used hours cannot be negative.")
         if value > 70:
-             raise serializers.ValidationError("Cycle used hours cannot exceed 70 hours.")
+            raise serializers.ValidationError(
+                "Cycle used hours cannot exceed 70 hours."
+            )
         return value
 
     def validate(self, data):
         """Cross-field validation."""
-        if data.get('current_location') == data.get('pickup_location'):
-             raise serializers.ValidationError("Current location and pickup location cannot be the same.")
+        if data.get("current_location") == data.get("pickup_location"):
+            raise serializers.ValidationError(
+                "Current location and pickup location cannot be the same."
+            )
         return data
 
     class Meta:
@@ -136,10 +140,10 @@ class TripSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         extra_kwargs = {
-            'current_location': {'required': True, 'allow_blank': False},
-            'pickup_location': {'required': True, 'allow_blank': False},
-            'dropoff_location': {'required': True, 'allow_blank': False},
-            'cycle_used_hours': {'required': True},
+            "current_location": {"required": True, "allow_blank": False},
+            "pickup_location": {"required": True, "allow_blank": False},
+            "dropoff_location": {"required": True, "allow_blank": False},
+            "cycle_used_hours": {"required": True},
         }
         read_only_fields = [
             "status",
