@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     # Third-party
     "rest_framework",
     "corsheaders",
+    "drf_spectacular",
     # Local
     "trips",
 ]
@@ -133,6 +134,14 @@ REST_FRAMEWORK = {
     "DEFAULT_PARSER_CLASSES": [
         "rest_framework.parsers.JSONParser",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "HOS Trip Planner API",
+    "DESCRIPTION": "API for Hours of Service Trip Planning and Compliance",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

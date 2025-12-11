@@ -1,5 +1,3 @@
-
-
 const SummaryPanel = ({ trip, recaps }) => {
   if (!trip) return null;
 

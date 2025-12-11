@@ -1,3 +1,4 @@
+from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -7,6 +8,12 @@ from .routing import geocode
 from .serializers import TripSerializer
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter("q", OpenApiTypes.STR, description="Address query string"),
+    ],
+    responses={200: OpenApiTypes.OBJECT},
+)
 @api_view(["GET"])
 def geocode_view(request):
     query = request.GET.get("q", "")
@@ -38,9 +45,6 @@ def geocode_view(request):
         )
     except Exception as e:
         return Response({"error": str(e)}, status=500)
-
-
-
 
 
 class TripViewSet(viewsets.ModelViewSet):

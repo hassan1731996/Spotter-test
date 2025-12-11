@@ -58,10 +58,11 @@ const LocationSearchInput = ({ label, value, onChange, onSelectLocation, id, err
           value={value}
           onChange={(e) => handleSearch(e.target.value)}
           className={`w-full p-2 pr-10 border rounded outline-none transition
-                        ${error
-              ? 'border-red-500 bg-red-50 focus:ring-red-200 focus:border-red-500 text-red-900 placeholder-red-300'
-              : 'border-slate-300 focus:ring-2 focus:ring-brand-blue focus:border-transparent'
-            }`}
+                        ${
+                          error
+                            ? 'border-red-500 bg-red-50 focus:ring-red-200 focus:border-red-500 text-red-900 placeholder-red-300'
+                            : 'border-slate-300 focus:ring-2 focus:ring-brand-blue focus:border-transparent'
+                        }`}
           placeholder="Search address..."
           autoComplete="off"
         />

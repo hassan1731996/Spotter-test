@@ -1,0 +1,537 @@
+openapi: 3.0.3
+info:
+  title: HOS Trip Planner API
+  version: 1.0.0
+  description: API for Hours of Service Trip Planning and Compliance
+paths:
+  /api/geocode/:
+    get:
+      operationId: geocode_retrieve
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Address query string
+      tags:
+      - geocode
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/trips/:
+    get:
+      operationId: trips_list
+      tags:
+      - trips
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Trip'
+          description: ''
+    post:
+      operationId: trips_create
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Trip'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+          description: ''
+  /api/trips/{id}/:
+    get:
+      operationId: trips_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this trip.
+        required: true
+      tags:
+      - trips
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+          description: ''
+    patch:
+      operationId: trips_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this trip.
+        required: true
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTrip'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+          description: ''
+components:
+  schemas:
+    CarrierInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        carrier_name:
+          type: string
+          maxLength: 255
+        carrier_address:
+          type: string
+        driver_name:
+          type: string
+          maxLength: 255
+        co_driver_name:
+          type: string
+          maxLength: 255
+        truck_number:
+          type: string
+          maxLength: 64
+        trailer_number:
+          type: string
+          maxLength: 64
+        time_zone:
+          type: string
+          maxLength: 64
+        shipping_docs:
+          type: string
+          maxLength: 255
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - carrier_name
+      - created_at
+      - id
+      - truck_number
+      - updated_at
+    DutySegment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        trip:
+          type: string
+          format: uuid
+          readOnly: true
+        stop:
+          type: string
+          format: uuid
+          nullable: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        activity:
+          type: string
+          maxLength: 255
+        location:
+          type: string
+          maxLength: 255
+        remarks:
+          type: string
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        day_index:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        distance_miles:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,2})?$
+        duration_minutes:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - duration_minutes
+      - end_time
+      - id
+      - start_time
+      - status
+      - trip
+      - updated_at
+    KindEnum:
+      enum:
+      - start
+      - pickup
+      - dropoff
+      - fuel
+      - break
+      - rest
+      - other
+      type: string
+      description: |-
+        * `start` - Start
+        * `pickup` - Pickup
+        * `dropoff` - Dropoff
+        * `fuel` - Fuel
+        * `break` - Break
+        * `rest` - Rest
+        * `other` - Other
+    PatchedTrip:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        carrier:
+          $ref: '#/components/schemas/CarrierInfo'
+        current_location:
+          type: string
+          maxLength: 255
+        pickup_location:
+          type: string
+          maxLength: 255
+        dropoff_location:
+          type: string
+          maxLength: 255
+        planned_start:
+          type: string
+          format: date-time
+        cycle_used_hours:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        use_34h_restart:
+          type: boolean
+        time_base:
+          type: string
+          maxLength: 64
+        total_distance_miles:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,2})?$
+          readOnly: true
+        total_drive_hours:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          readOnly: true
+        total_on_duty_hours:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          readOnly: true
+        status:
+          type: string
+          readOnly: true
+        stops:
+          type: array
+          items:
+            $ref: '#/components/schemas/Stop'
+          readOnly: true
+        segments:
+          type: array
+          items:
+            $ref: '#/components/schemas/DutySegment'
+          readOnly: true
+        recaps:
+          type: array
+          items:
+            $ref: '#/components/schemas/Recap'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    Recap:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        trip:
+          type: string
+          format: uuid
+          readOnly: true
+        day_index:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        date:
+          type: string
+          format: date
+        driving_hours:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        on_duty_hours:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        off_duty_hours:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        sleeper_hours:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        cycle_used_hours:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        cycle_remaining_hours:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        notes:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - date
+      - day_index
+      - id
+      - trip
+      - updated_at
+    StatusEnum:
+      enum:
+      - off_duty
+      - sleeper
+      - driving
+      - on_duty
+      type: string
+      description: |-
+        * `off_duty` - Off Duty
+        * `sleeper` - Sleeper Berth
+        * `driving` - Driving
+        * `on_duty` - On Duty (Not Driving)
+    Stop:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        trip:
+          type: string
+          format: uuid
+          readOnly: true
+        kind:
+          $ref: '#/components/schemas/KindEnum'
+        name:
+          type: string
+          maxLength: 255
+        sequence:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        latitude:
+          type: number
+          format: double
+          nullable: true
+        longitude:
+          type: number
+          format: double
+          nullable: true
+        planned_start:
+          type: string
+          format: date-time
+          nullable: true
+        duration_minutes:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        remarks:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - kind
+      - name
+      - trip
+      - updated_at
+    Trip:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        carrier:
+          $ref: '#/components/schemas/CarrierInfo'
+        current_location:
+          type: string
+          maxLength: 255
+        pickup_location:
+          type: string
+          maxLength: 255
+        dropoff_location:
+          type: string
+          maxLength: 255
+        planned_start:
+          type: string
+          format: date-time
+        cycle_used_hours:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        use_34h_restart:
+          type: boolean
+        time_base:
+          type: string
+          maxLength: 64
+        total_distance_miles:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,2})?$
+          readOnly: true
+        total_drive_hours:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          readOnly: true
+        total_on_duty_hours:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          readOnly: true
+        status:
+          type: string
+          readOnly: true
+        stops:
+          type: array
+          items:
+            $ref: '#/components/schemas/Stop'
+          readOnly: true
+        segments:
+          type: array
+          items:
+            $ref: '#/components/schemas/DutySegment'
+          readOnly: true
+        recaps:
+          type: array
+          items:
+            $ref: '#/components/schemas/Recap'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - carrier
+      - created_at
+      - current_location
+      - cycle_used_hours
+      - dropoff_location
+      - id
+      - pickup_location
+      - recaps
+      - segments
+      - status
+      - stops
+      - total_distance_miles
+      - total_drive_hours
+      - total_on_duty_hours
+      - updated_at
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

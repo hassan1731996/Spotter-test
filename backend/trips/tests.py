@@ -90,9 +90,6 @@ class HOSComplianceServiceTestCase(TestCase):
         self.assertEqual(rest_segs[0]["duration_minutes"], 600)
 
 
-
-
-
 class LogRendererServiceTestCase(TestCase):
     def test_recap_calculation(self):
         """Test arithmetic for recap summaries"""

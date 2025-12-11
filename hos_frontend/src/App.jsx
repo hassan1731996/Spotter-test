@@ -1,4 +1,3 @@
-
 import TripInputForm from './components/TripInputForm';
 import MapView from './components/MapView';
 import LogSheetGrid from './components/LogSheetGrid';

@@ -1,4 +1,3 @@
-
 from ..models import StopType
 from ..routing import geocode, get_route
 
