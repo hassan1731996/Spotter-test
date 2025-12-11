@@ -29,8 +29,8 @@ const LogSheetGrid = ({ segments, dayIndex }) => {
         Driver's Daily Log (Day {dayIndex})
       </h3>
 
-      <div className="relative min-w-[1024px]">
-        <svg width={GRID_WIDTH + 100} height={ROW_HEIGHT * 4 + 50}>
+      <div className="relative w-full">
+        <svg width="100%" height={ROW_HEIGHT * 4 + 100} viewBox={`0 0 ${GRID_WIDTH + 100} ${ROW_HEIGHT * 4 + 50}`} preserveAspectRatio="none">
           {/* Background Grid */}
           <g className="grid-lines">
             {/* Horizontal Lines */}
@@ -70,7 +70,7 @@ const LogSheetGrid = ({ segments, dayIndex }) => {
             {Object.entries(STATUS_ROWS).map(([status, row]) => (
               <text
                 key={status}
-                x={START_X - 10}
+                x={START_X - 5}
                 y={row * ROW_HEIGHT + ROW_HEIGHT / 2 + 4}
                 textAnchor="end"
                 fontSize="10"

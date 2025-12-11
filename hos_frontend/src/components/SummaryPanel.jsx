@@ -2,7 +2,7 @@ const SummaryPanel = ({ trip, recaps }) => {
   if (!trip) return null;
 
   return (
-    <div className="bg-white p-4 shadow rounded-lg mt-4">
+    <div className="bg-white p-4 shadow rounded-lg ">
       <h2 className="text-xl font-bold mb-4">Trip Summary</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="p-3 bg-blue-50 rounded">

@@ -52,6 +52,33 @@ const RecenterAutomatically = ({ lat, lng }) => {
   return null;
 };
 
+const InvalidateSize = () => {
+  const map = useMap();
+
+  useEffect(() => {
+    // Wait for map to be ready, then invalidate size
+    map.whenReady(() => {
+      map.invalidateSize();
+    });
+
+    // Use ResizeObserver to watch for container size changes
+    const container = map.getContainer();
+    const resizeObserver = new ResizeObserver(() => {
+      map.invalidateSize();
+    });
+
+    if (container.parentElement) {
+      resizeObserver.observe(container.parentElement);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [map]);
+
+  return null;
+};
+
 const MapView = ({ stops }) => {
   // Calculate center or bounds
   const center = [39.8283, -98.5795]; // US Center
@@ -60,7 +87,7 @@ const MapView = ({ stops }) => {
   const positions = stops.map((s) => [s.latitude || 0, s.longitude || 0]).filter((p) => p[0] !== 0);
 
   return (
-    <div className="h-full w-full bg-gray-100 rounded-lg overflow-hidden shadow">
+    <div className="h-full w-full">
       <MapContainer
         center={center}
         zoom={4}
@@ -71,6 +98,7 @@ const MapView = ({ stops }) => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <InvalidateSize />
         {stops.map(
           (stop) =>
             stop.latitude && (

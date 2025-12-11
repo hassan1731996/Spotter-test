@@ -47,7 +47,7 @@ const ComplianceDashboard = ({ recaps }) => {
   if (!today) return null;
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow border border-slate-200 mb-6">
+    <div className="bg-white p-4 rounded-lg shadow border border-slate-200 ">
       <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 border-b pb-2">
         Compliance Status
       </h3>

@@ -28,7 +28,7 @@ function MainContent() {
       </header>
 
       <main
-        className={`mx-auto transition-all duration-500 ${trip ? 'w-full max-w-[1920px]' : 'max-w-4xl'}`}
+        className={`mx-auto transition-all duration-500 ${trip ? 'w-full p-8' : 'max-w-4xl'}`}
       >
         <div
           className={`grid gap-4 ${trip ? 'grid-cols-1 lg:grid-cols-12 items-start' : 'grid-cols-1'}`}
@@ -44,17 +44,23 @@ function MainContent() {
               >
                 <p className="font-bold">Simulation Error</p>
                 <p>{error}</p>
+
               </div>
             )}
+            {trip && <div className="xl:col-span-1 flex flex-col gap-4 h-full overflow-y-auto pr-1 mt-4">
+              <ComplianceDashboard recaps={trip.recaps} trip={trip} />
+              <SummaryPanel trip={trip} recaps={trip.recaps} />
+            </div>}
           </div>
+
 
           {/* Results Column */}
           {trip && (
             <div className="lg:col-span-9 xl:col-span-10 space-y-4 animate-fadeIn">
               {/* Upper Dashboard: Map + Status */}
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 h-[500px]">
+              <div className="h-[500px]">
                 {/* Main Map - Takes 2/3 width on huge screens, full on large */}
-                <div className="xl:col-span-2 h-full bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative">
+                <div className="h-full bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative">
                   <div className="absolute top-2 left-2 z-[400] bg-white/90 backdrop-blur px-3 py-1 rounded shadow text-xs font-bold text-brand-navy">
                     Interactive Route Map
                   </div>
@@ -64,10 +70,7 @@ function MainContent() {
                 </div>
 
                 {/* Right Side Stats Panel */}
-                <div className="xl:col-span-1 flex flex-col gap-4 h-full overflow-y-auto pr-1">
-                  <ComplianceDashboard recaps={trip.recaps} trip={trip} />
-                  <SummaryPanel trip={trip} recaps={trip.recaps} />
-                </div>
+
               </div>
 
               {/* Bottom Section: Logs */}
@@ -88,7 +91,7 @@ function MainContent() {
                   </svg>
                   Daily Duty Status Logs
                 </h2>
-                <div className="grid grid-cols-1 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {trip.recaps.map((recap) => (
                     <LogSheetGrid
                       key={recap.day_index}

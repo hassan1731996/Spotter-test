@@ -193,7 +193,7 @@ const TripInputForm = ({ onSubmit, isLoading, compactMode = false }) => {
             <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 border-b pb-2">
               Compliance & Carrier
             </h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-4">
               <div>
                 <label
                   htmlFor="cycle_used_hours"
@@ -255,7 +255,7 @@ const TripInputForm = ({ onSubmit, isLoading, compactMode = false }) => {
                 )}
               </div>
 
-              <div className="col-span-2">
+              <div>
                 <label
                   htmlFor="carrier_name"
                   className="block text-brand-navy text-sm font-semibold mb-1"
