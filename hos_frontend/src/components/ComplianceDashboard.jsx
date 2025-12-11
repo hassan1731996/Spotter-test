@@ -51,16 +51,41 @@ const ComplianceDashboard = ({ recaps }) => {
       <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 border-b pb-2">
         Compliance Status
       </h3>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Gauge value={Number(today.driving_hours)} max={11} label="Drive Time" color="#3b82f6" />
-        <Gauge
-          value={Number(today.on_duty_hours) + Number(today.driving_hours)}
-          max={14}
-          label="Shift Window"
-          color="#f59e0b"
-        />
+      <div className="space-y-4">
+        {/* Drive Time Progress Bar */}
+        <div className="flex flex-col justify-center bg-brand-light rounded p-4 border border-slate-100">
+          <div className="flex justify-between items-end mb-2">
+            <span className="text-sm font-semibold text-slate-600">Drive Time</span>
+            <span className={`text-xl font-bold ${Number(today.driving_hours) > 9 ? 'text-brand-error' : 'text-brand-navy'}`}>
+              {Number(today.driving_hours).toFixed(1)}h / 11h
+            </span>
+          </div>
+          <div className="w-full bg-slate-200 rounded-full h-2.5">
+            <div
+              className={`h-2.5 rounded-full ${Number(today.driving_hours) > 9 ? 'bg-brand-error' : 'bg-blue-500'}`}
+              style={{ width: `${(Number(today.driving_hours) / 11) * 100}%` }}
+            ></div>
+          </div>
+        </div>
 
-        <div className="col-span-2 flex flex-col justify-center bg-brand-light rounded p-4 border border-slate-100">
+        {/* Shift Window Progress Bar */}
+        <div className="flex flex-col justify-center bg-brand-light rounded p-4 border border-slate-100">
+          <div className="flex justify-between items-end mb-2">
+            <span className="text-sm font-semibold text-slate-600">Shift Window</span>
+            <span className={`text-xl font-bold ${(Number(today.on_duty_hours) + Number(today.driving_hours)) > 12 ? 'text-brand-error' : 'text-brand-navy'}`}>
+              {(Number(today.on_duty_hours) + Number(today.driving_hours)).toFixed(1)}h / 14h
+            </span>
+          </div>
+          <div className="w-full bg-slate-200 rounded-full h-2.5">
+            <div
+              className={`h-2.5 rounded-full ${(Number(today.on_duty_hours) + Number(today.driving_hours)) > 12 ? 'bg-brand-error' : 'bg-amber-500'}`}
+              style={{ width: `${((Number(today.on_duty_hours) + Number(today.driving_hours)) / 14) * 100}%` }}
+            ></div>
+          </div>
+        </div>
+
+        {/* Cycle Progress Bar */}
+        <div className="flex flex-col justify-center bg-brand-light rounded p-4 border border-slate-100">
           <div className="flex justify-between items-end mb-2">
             <span className="text-sm font-semibold text-slate-600">Cycle (70h/8d)</span>
             <span
