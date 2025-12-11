@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 from pathlib import Path
 
+from corsheaders.defaults import default_headers
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -22,6 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-default-key-for-dev")
+
+# API Key for Authentication
+API_KEY = os.getenv("API_KEY", "your-secret-api-key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "True") == "True"
@@ -135,13 +139,36 @@ REST_FRAMEWORK = {
         "rest_framework.parsers.JSONParser",
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "backend.authentication.ApiKeyAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
 }
+
+
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "x-api-key",
+]
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "HOS Trip Planner API",
     "DESCRIPTION": "API for Hours of Service Trip Planning and Compliance",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "SECURITY": [{"ApiKeyAuth": []}],
+    "COMPONENT_SPLIT_REQUEST": True,
+    "APPEND_COMPONENTS": {
+        "securitySchemes": {
+            "ApiKeyAuth": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "X-API-KEY",
+            }
+        }
+    },
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

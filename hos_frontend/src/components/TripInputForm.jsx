@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import LocationSearchInput from './LocationSearchInput';
-import axios from 'axios';
+import api from '../api';
 import InputMapPreview from './InputMapPreview';
 
 const TripInputForm = ({ onSubmit, isLoading, compactMode = false }) => {
@@ -36,8 +36,8 @@ const TripInputForm = ({ onSubmit, isLoading, compactMode = false }) => {
       for (const loc of locations) {
         if (loc.query) {
           try {
-            const res = await axios.get(
-              `${API_BASE_URL}/geocode/?q=${encodeURIComponent(loc.query)}`
+            const res = await api.get(
+              `/geocode/?q=${encodeURIComponent(loc.query)}`
             );
             if (res.data.features && res.data.features.length > 0) {
               const [lon, lat] = res.data.features[0].geometry.coordinates;
@@ -290,11 +290,10 @@ const TripInputForm = ({ onSubmit, isLoading, compactMode = false }) => {
               type="submit"
               disabled={isLoading}
               className={`w-full py-3 px-6 rounded-xl font-bold text-lg shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2
-                                ${
-                                  compactMode
-                                    ? 'bg-white text-brand-blue border-2 border-brand-blue hover:bg-blue-50'
-                                    : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl ring-offset-2 focus:ring-4 focus:ring-blue-300'
-                                }`}
+                                ${compactMode
+                  ? 'bg-white text-brand-blue border-2 border-brand-blue hover:bg-blue-50'
+                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl ring-offset-2 focus:ring-4 focus:ring-blue-300'
+                }`}
             >
               {isLoading ? (
                 <>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import api from '../api';
 
 const LocationSearchInput = ({ label, value, onChange, onSelectLocation, id, error }) => {
   const [suggestions, setSuggestions] = useState([]);
@@ -25,8 +25,8 @@ const LocationSearchInput = ({ label, value, onChange, onSelectLocation, id, err
       try {
         // In a real app we'd use a debounce here
         // Calling our backend proxy
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-        const res = await axios.get(`${API_BASE_URL}/geocode/?q=${encodeURIComponent(text)}`);
+        // Calling our backend proxy
+        const res = await api.get(`/geocode/?q=${encodeURIComponent(text)}`);
 
         if (res.data.features) {
           setSuggestions(res.data.features);
@@ -58,11 +58,10 @@ const LocationSearchInput = ({ label, value, onChange, onSelectLocation, id, err
           value={value}
           onChange={(e) => handleSearch(e.target.value)}
           className={`w-full p-2 pr-10 border rounded outline-none transition
-                        ${
-                          error
-                            ? 'border-red-500 bg-red-50 focus:ring-red-200 focus:border-red-500 text-red-900 placeholder-red-300'
-                            : 'border-slate-300 focus:ring-2 focus:ring-brand-blue focus:border-transparent'
-                        }`}
+                        ${error
+              ? 'border-red-500 bg-red-50 focus:ring-red-200 focus:border-red-500 text-red-900 placeholder-red-300'
+              : 'border-slate-300 focus:ring-2 focus:ring-brand-blue focus:border-transparent'
+            }`}
           placeholder="Search address..."
           autoComplete="off"
         />
