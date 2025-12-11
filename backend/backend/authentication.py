@@ -1,6 +1,7 @@
 from django.conf import settings
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
+from drf_spectacular.extensions import OpenApiAuthenticationExtension
 
 
 class ServiceUser:
@@ -21,3 +22,15 @@ class ApiKeyAuthentication(BaseAuthentication):
             raise AuthenticationFailed("Invalid API Key")
 
         return (ServiceUser(), None)
+
+
+class ApiKeyAuthenticationScheme(OpenApiAuthenticationExtension):
+    target_class = ApiKeyAuthentication
+    name = "ApiKeyAuth"
+
+    def get_security_definition(self, auto_schema):
+        return {
+            "type": "apiKey",
+            "in": "header",
+            "name": "X-API-KEY",
+        }
